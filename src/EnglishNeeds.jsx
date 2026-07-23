@@ -218,6 +218,9 @@ export default function EnglishNeeds() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [codeInput, setCodeInput] = useState('');
   const [message, setMessage] = useState('');
+  const [adminMode, setAdminMode] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminCodes, setAdminCodes] = useState([]);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -341,6 +344,32 @@ export default function EnglishNeeds() {
     setUnlockedStamps({});
   };
 
+  const handleAdminLogin = () => {
+    if (adminPassword === 'admin123') {
+      setAdminMode(true);
+      setAdminPassword('');
+      const savedCodes = localStorage.getItem('englishneeds:adminCodes');
+      if (savedCodes) setAdminCodes(JSON.parse(savedCodes));
+    } else {
+      setMessage('❌ Wrong password');
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  const generateCode = (prefix) => {
+    const newCode = `${prefix}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    const newCodes = [...adminCodes, { code: newCode, missions: ['destination', 'recruiter', 'visibility', 'hunter'], used: false, createdAt: new Date().toLocaleString() }];
+    setAdminCodes(newCodes);
+    localStorage.setItem('englishneeds:adminCodes', JSON.stringify(newCodes));
+    setMessage(`✨ Code created: ${newCode}`);
+    setTimeout(() => setMessage(''), 3000);
+    return newCode;
+  };
+
+  if (adminMode) {
+    return <AdminPanel onLogout={() => setAdminMode(false)} onGenerateCode={generateCode} adminCodes={adminCodes} />;
+  }
+
   if (!profile) {
     return <OnboardingFlow onComplete={handleOnboarding} />;
   }
@@ -357,12 +386,15 @@ export default function EnglishNeeds() {
             <Trophy className="w-8 h-8 text-matrix-green" />
             <h1 className="text-2xl font-bold">English Needs</h1>
           </div>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden">
-            {mobileMenuOpen ? <X /> : <Menu />}
-          </button>
-          <button onClick={handleLogout} className="hidden md:flex items-center gap-2 px-4 py-2 rounded bg-red-600/20 hover:bg-red-600/40 transition">
-            <LogOut className="w-4 h-4" /> Logout
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setAdminMode(true)} className="px-2 py-1 text-xs text-gray-500 hover:text-gray-400 rounded">⚙️</button>
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden">
+              {mobileMenuOpen ? <X /> : <Menu />}
+            </button>
+            <button onClick={handleLogout} className="hidden md:flex items-center gap-2 px-4 py-2 rounded bg-red-600/20 hover:bg-red-600/40 transition">
+              <LogOut className="w-4 h-4" /> Logout
+            </button>
+          </div>
         </div>
       </header>
 
@@ -688,6 +720,145 @@ function RewardModal({ onClose }) {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// ADMIN PANEL COMPONENT
+// ============================================================================
+
+function AdminPanel({ onLogout, onGenerateCode, adminCodes }) {
+  const [adminPassword, setAdminPassword] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [codePrefix, setCodePrefix] = useState('FLOR');
+
+  const handleLogin = () => {
+    if (adminPassword === 'admin123') {
+      setIsLoggedIn(true);
+      setAdminPassword('');
+    } else {
+      alert('❌ Wrong password');
+    }
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-matrix-darker text-white flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-2">Admin Panel</h1>
+            <p className="text-gray-400">Enter admin password</p>
+          </div>
+          <div className="bg-black/50 rounded-lg p-8 border border-green-900/30 space-y-4">
+            <input
+              type="password"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+              placeholder="Password"
+              className="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-matrix-green"
+            />
+            <button onClick={handleLogin} className="w-full py-3 bg-matrix-green text-black font-bold rounded hover:bg-green-300 transition">
+              Login
+            </button>
+            <button onClick={onLogout} className="w-full py-2 bg-gray-700/30 hover:bg-gray-700/50 rounded transition">
+              Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-matrix-darker text-white">
+      <header className="bg-black/50 backdrop-blur-sm border-b border-green-900/30 p-4">
+        <div className="max-w-5xl mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-matrix-green">⚙️ Admin Panel</h1>
+          <button onClick={onLogout} className="px-4 py-2 bg-red-600/20 hover:bg-red-600/40 rounded transition">
+            Exit
+          </button>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto p-8 space-y-8">
+        {/* Generate Codes */}
+        <section className="bg-black/30 border border-green-900/30 rounded-lg p-6">
+          <h2 className="text-xl font-bold mb-4">Generate Student Codes</h2>
+          <div className="flex gap-2 mb-4">
+            <input
+              type="text"
+              value={codePrefix}
+              onChange={(e) => setCodePrefix(e.target.value.toUpperCase())}
+              placeholder="Code prefix (e.g., FLOR)"
+              className="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-matrix-green"
+            />
+            <button
+              onClick={() => onGenerateCode(codePrefix)}
+              className="px-6 py-2 bg-matrix-green text-black font-bold rounded hover:bg-green-300 transition"
+            >
+              Generate
+            </button>
+          </div>
+          <p className="text-sm text-gray-400">Codes unlock 4 missions: Destination, Recruiter Ready, Visibility, Job Hunter</p>
+        </section>
+
+        {/* Created Codes */}
+        <section className="bg-black/30 border border-green-900/30 rounded-lg p-6">
+          <h2 className="text-xl font-bold mb-4">Created Codes ({adminCodes.length})</h2>
+          {adminCodes.length === 0 ? (
+            <p className="text-gray-400">No codes created yet</p>
+          ) : (
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {adminCodes.map((item, i) => (
+                <div key={i} className="flex items-center justify-between bg-gray-900/50 p-3 rounded border border-gray-700/50">
+                  <div>
+                    <p className="font-mono font-bold text-matrix-green">{item.code}</p>
+                    <p className="text-xs text-gray-500">{item.createdAt}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(item.code);
+                      alert('✅ Copied!');
+                    }}
+                    className="px-3 py-1 bg-blue-600/30 hover:bg-blue-600/50 rounded text-sm transition"
+                  >
+                    Copy
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Quick Actions */}
+        <section className="bg-black/30 border border-green-900/30 rounded-lg p-6">
+          <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => {
+                const newCode = `DEMO-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+                onGenerateCode('DEMO');
+              }}
+              className="px-4 py-2 bg-purple-600/30 hover:bg-purple-600/50 rounded transition text-sm"
+            >
+              Generate DEMO Code
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm('Clear all codes?')) {
+                  localStorage.removeItem('englishneeds:adminCodes');
+                  alert('✅ All codes cleared');
+                }
+              }}
+              className="px-4 py-2 bg-red-600/30 hover:bg-red-600/50 rounded transition text-sm"
+            >
+              Clear All Codes
+            </button>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
