@@ -344,18 +344,6 @@ export default function EnglishNeeds() {
     setUnlockedStamps({});
   };
 
-  const handleAdminLogin = () => {
-    if (adminPassword === 'admin123') {
-      setAdminMode(true);
-      setAdminPassword('');
-      const savedCodes = localStorage.getItem('englishneeds:adminCodes');
-      if (savedCodes) setAdminCodes(JSON.parse(savedCodes));
-    } else {
-      setMessage('❌ Wrong password');
-      setTimeout(() => setMessage(''), 3000);
-    }
-  };
-
   const generateCode = (prefix) => {
     const newCode = `${prefix}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     const newCodes = [...adminCodes, { code: newCode, missions: ['destination', 'recruiter', 'visibility', 'hunter'], used: false, createdAt: new Date().toLocaleString() }];
@@ -837,10 +825,7 @@ function AdminPanel({ onLogout, onGenerateCode, adminCodes }) {
           <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => {
-                const newCode = `DEMO-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-                onGenerateCode('DEMO');
-              }}
+              onClick={() => onGenerateCode('DEMO')}
               className="px-4 py-2 bg-purple-600/30 hover:bg-purple-600/50 rounded transition text-sm"
             >
               Generate DEMO Code
