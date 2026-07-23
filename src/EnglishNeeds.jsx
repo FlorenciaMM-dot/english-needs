@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, CheckCircle2, Lock, LogOut, Menu, X, Trophy, Zap, Target, Users } from 'lucide-react';
+import { BookOpen, Lock, LogOut, Menu, X, Trophy, Zap, Target, Users } from 'lucide-react';
 const STAMP_CODES = {
   'DEMO': ['mindset', 'cv'],
   'MINDSET001': ['mindset'],
