@@ -507,14 +507,9 @@ export default function EnglishNeeds() {
                   <li><span className="text-matrix-green font-semibold">Q&A Sessions</span> - Ask experts about interview strategies</li>
                 </ul>
               </div>
-              <div className="flex gap-2">
-                <a href="https://skool.com" target="_blank" rel="noopener noreferrer" className="flex-1 px-4 py-2 bg-red-600/30 hover:bg-red-600/50 border border-red-600/50 rounded transition text-center">
-                  → Schedule Session
-                </a>
-                <a href="https://skool.com" target="_blank" rel="noopener noreferrer" className="flex-1 px-4 py-2 bg-orange-600/30 hover:bg-orange-600/50 border border-orange-600/50 rounded transition text-center">
-                  → View Recordings
-                </a>
-              </div>
+              <a href="https://skool.com" target="_blank" rel="noopener noreferrer" className="w-full px-4 py-2 bg-red-600/30 hover:bg-red-600/50 border border-red-600/50 rounded transition text-center">
+                → Schedule Session
+              </a>
             </section>
           </div>
         </main>
