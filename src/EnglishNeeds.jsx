@@ -211,7 +211,6 @@ export default function EnglishNeeds() {
   const [missionProgress, setMissionProgress] = useState({});
   const [completedMissions, setCompletedMissions] = useState([]);
   const [unlockedStamps, setUnlockedStamps] = useState({});
-  const [currentView, setCurrentView] = useState('passport');
   const [selectedMission, setSelectedMission] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebratingStampId, setCelebratingStampId] = useState(null);
@@ -252,8 +251,6 @@ export default function EnglishNeeds() {
   // ============================================================================
   // PHASE 4: HELPER FUNCTIONS
   // ============================================================================
-
-  const getMission = (missionId) => MISSIONS[missionId];
 
   const getAllMissions = () => Object.values(MISSIONS).sort((a, b) => a.order - b.order);
 
