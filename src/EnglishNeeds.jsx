@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, LogOut, Menu, X, CheckCircle, AlertCircle, Sparkles, Trophy, ChevronRight } from 'lucide-react';
+import { LogOut, Menu, X, Trophy } from 'lucide-react';
 
 // ============================================================================
 // PHASE 1: DATA STRUCTURE - 8 Missions with objectives and tasks
