@@ -219,7 +219,6 @@ export default function EnglishNeeds() {
   const [codeInput, setCodeInput] = useState('');
   const [message, setMessage] = useState('');
   const [adminMode, setAdminMode] = useState(false);
-  const [adminPassword, setAdminPassword] = useState('');
   const [adminCodes, setAdminCodes] = useState([]);
 
   // Load from localStorage on mount
