@@ -81,6 +81,7 @@ const ROADMAP = [
 export default function EnglishNeeds() {
   const [profile, setProfile] = useState(null);
   const [stamps, setStamps] = useState({});
+  const [completedTasks, setCompletedTasks] = useState({});
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedStamp, setSelectedStamp] = useState(null);
   const [codeInput, setCodeInput] = useState('');
@@ -89,13 +90,19 @@ export default function EnglishNeeds() {
   useEffect(() => {
     const savedProfile = localStorage.getItem('englishneeds:profile');
     const savedStamps = localStorage.getItem('englishneeds:stamps');
+    const savedTasks = localStorage.getItem('englishneeds:tasks');
     if (savedProfile) setProfile(JSON.parse(savedProfile));
     if (savedStamps) setStamps(JSON.parse(savedStamps));
+    if (savedTasks) setCompletedTasks(JSON.parse(savedTasks));
   }, []);
 
   useEffect(() => {
     if (profile) localStorage.setItem('englishneeds:profile', JSON.stringify(profile));
   }, [profile]);
+
+  useEffect(() => {
+    localStorage.setItem('englishneeds:tasks', JSON.stringify(completedTasks));
+  }, [completedTasks]);
 
   useEffect(() => {
     localStorage.setItem('englishneeds:stamps', JSON.stringify(stamps));
@@ -126,16 +133,25 @@ export default function EnglishNeeds() {
   const handleLogout = () => {
     localStorage.removeItem('englishneeds:profile');
     localStorage.removeItem('englishneeds:stamps');
+    localStorage.removeItem('englishneeds:tasks');
     setProfile(null);
     setStamps({});
     // setCurrentStep(0);
+    setCompletedTasks({});
   };
 
   if (!profile) {
     return <OnboardingFlow onComplete={handleOnboarding} />;
   }
 
-  const daysCompleted = Math.floor(Math.random() * 28) + 1;
+  const toggleTask = (day) => {
+    setCompletedTasks(prev => ({
+      ...prev,
+      [day]: !prev[day]
+    }));
+  };
+
+  const daysCompleted = Object.values(completedTasks).filter(Boolean).length;
   const streakDays = Math.floor(Math.random() * 15) + 1;
   const stampsUnlocked = Object.values(stamps).filter(Boolean).length;
 
@@ -294,10 +310,23 @@ export default function EnglishNeeds() {
                     </div>
                     <div className="p-4 space-y-2">
                       {week.days.map((item) => (
-                        <div key={item.day} className="flex items-center gap-3 text-sm">
-                          <CheckCircle2 className="w-5 h-5 text-matrix-green flex-shrink-0" />
+                        <button
+                          key={item.day}
+                          onClick={() => toggleTask(item.day)}
+                          className={`w-full flex items-center gap-3 text-sm p-2 rounded transition ${
+                            completedTasks[item.day]
+                              ? 'bg-matrix-green/20 line-through text-gray-500'
+                              : 'hover:bg-gray-800/50'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={completedTasks[item.day] || false}
+                            onChange={() => {}}
+                            className="w-5 h-5 cursor-pointer accent-matrix-green"
+                          />
                           <span>Day {item.day}: {item.task}</span>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -317,6 +346,33 @@ export default function EnglishNeeds() {
               <a href="https://skool.com" target="_blank" rel="noopener noreferrer" className="inline-block px-4 py-2 bg-purple-600/30 hover:bg-purple-600/50 border border-purple-600/50 rounded transition">
                 → Join Community
               </a>
+            </section>
+
+            {/* Live Sessions */}
+            <section className="bg-gradient-to-r from-red-600/10 to-orange-600/10 rounded-lg p-6 border border-red-600/30">
+              <h3 className="font-bold mb-3 flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                🎙️ Live Sessions & Interview Simulations
+              </h3>
+              <div className="space-y-3 text-sm text-gray-300">
+                <p>
+                  Join interactive live sessions 3x per week featuring:
+                </p>
+                <ul className="list-disc list-inside space-y-2 ml-2">
+                  <li><span className="text-matrix-green font-semibold">Real Interview Practice</span> - Mock interviews with industry professionals</li>
+                  <li><span className="text-matrix-green font-semibold">Live Feedback</span> - Get constructive criticism on your responses</li>
+                  <li><span className="text-matrix-green font-semibold">Q&A Sessions</span> - Ask experts about interview strategies</li>
+                  <li><span className="text-matrix-green font-semibold">Peer Learning</span> - Learn from other candidates' experiences</li>
+                </ul>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <a href="https://skool.com" target="_blank" rel="noopener noreferrer" className="flex-1 px-4 py-2 bg-red-600/30 hover:bg-red-600/50 border border-red-600/50 rounded transition text-center">
+                  → Schedule Session
+                </a>
+                <a href="https://skool.com" target="_blank" rel="noopener noreferrer" className="flex-1 px-4 py-2 bg-orange-600/30 hover:bg-orange-600/50 border border-orange-600/50 rounded transition text-center">
+                  → View Recordings
+                </a>
+              </div>
             </section>
           </div>
         </main>
