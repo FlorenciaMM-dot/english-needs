@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, CheckCircle2, Lock, LogOut, Menu, X, Trophy, Zap, Target, Users, FileText, Briefcase } from 'lucide-react';
-
+import { BookOpen, CheckCircle2, Lock, LogOut, Menu, X, Trophy, Zap, Target, Users } from 'lucide-react';
 const STAMP_CODES = {
   'DEMO': ['mindset', 'cv'],
   'MINDSET001': ['mindset'],
@@ -82,7 +81,6 @@ const ROADMAP = [
 export default function EnglishNeeds() {
   const [profile, setProfile] = useState(null);
   const [stamps, setStamps] = useState({});
-  const [currentStep, setCurrentStep] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedStamp, setSelectedStamp] = useState(null);
   const [codeInput, setCodeInput] = useState('');
