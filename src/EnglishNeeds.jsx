@@ -103,7 +103,7 @@ export default function EnglishNeeds() {
 
   const handleOnboarding = (data) => {
     setProfile(data);
-    setCurrentStep(5);
+    // setCurrentStep(5);
   };
 
   const handleUnlockStamp = () => {
@@ -128,7 +128,7 @@ export default function EnglishNeeds() {
     localStorage.removeItem('englishneeds:stamps');
     setProfile(null);
     setStamps({});
-    setCurrentStep(0);
+    // setCurrentStep(0);
   };
 
   if (!profile) {
