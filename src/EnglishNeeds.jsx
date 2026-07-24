@@ -367,12 +367,11 @@ export default function EnglishNeeds() {
       {/* Header */}
       <header className="bg-black/50 backdrop-blur-sm border-b border-green-900/30 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setAdminMode(true)} title="Admin access">
             <Trophy className="w-8 h-8 text-matrix-green" />
             <h1 className="text-2xl font-bold">English Needs</h1>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => setAdminMode(true)} className="px-2 py-1 text-xs text-gray-500 hover:text-gray-400 rounded">⚙️</button>
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden">
               {mobileMenuOpen ? <X /> : <Menu />}
             </button>
@@ -746,7 +745,7 @@ function AdminPanel({ onLogout, onGenerateCode, adminCodes }) {
   const [selectedMissionId, setSelectedMissionId] = useState('mission_1');
 
   const handleLogin = () => {
-    if (adminPassword === 'admin123') {
+    if (adminPassword === 'Flor2025!Skool') {
       setIsLoggedIn(true);
       setAdminPassword('');
     } else {
