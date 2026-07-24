@@ -262,11 +262,6 @@ export default function EnglishNeeds() {
     return { completed, total: tasks.length, percentage: Math.round((completed / tasks.length) * 100) };
   };
 
-  const isMissionComplete = (missionId) => {
-    const { completed, total } = getMissionProgress(missionId);
-    return completed === total && total > 0;
-  };
-
   const isMissionUnlocked = (missionId) => {
     const mission = MISSIONS[missionId];
     return mission.requiredStamps.every(stampId => unlockedStamps[stampId]);
