@@ -356,7 +356,7 @@ export default function EnglishNeeds() {
   }
 
   if (!profile) {
-    return <OnboardingFlow onComplete={handleOnboarding} />;
+    return <OnboardingFlow onComplete={handleOnboarding} onAdminClick={() => setAdminMode(true)} />;
   }
 
   const nextMission = getNextMission();
@@ -909,7 +909,7 @@ function AdminPanel({ onLogout, onGenerateCode, adminCodes }) {
 // ONBOARDING FLOW COMPONENT
 // ============================================================================
 
-function OnboardingFlow({ onComplete }) {
+function OnboardingFlow({ onComplete, onAdminClick }) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState({ name: '', email: '', level: 'intermediate', goal: '' });
 
@@ -925,7 +925,9 @@ function OnboardingFlow({ onComplete }) {
     <div className="min-h-screen bg-gradient-to-br from-matrix-darker via-blue-900/20 to-purple-900/20 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <Trophy className="w-16 h-16 text-matrix-green mx-auto mb-4" />
+          <div className="flex items-center justify-center gap-2 cursor-pointer hover:opacity-80" onClick={onAdminClick} title="Admin">
+            <Trophy className="w-16 h-16 text-matrix-green" />
+          </div>
           <h1 className="text-4xl font-bold text-white mb-2">English Needs</h1>
           <p className="text-gray-400">8-mission interview mastery program</p>
         </div>
