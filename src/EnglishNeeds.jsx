@@ -289,15 +289,18 @@ export default function EnglishNeeds() {
       }
     };
     setMissionProgress(updated);
-
-    if (isMissionComplete(missionId) && !completedMissions.includes(missionId)) {
-      handleMissionComplete(missionId);
-    }
   };
 
-  const handleMissionComplete = (missionId) => {
-    const mission = MISSIONS[missionId];
+  const handleMissionUnlock = (missionId, code) => {
+    const validCode = adminCodes.find(c => c.code.toUpperCase() === code.toUpperCase() && c.missionId === missionId);
 
+    if (!validCode) {
+      setMessage('❌ Invalid code for this mission');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+
+    const mission = MISSIONS[missionId];
     setCompletedMissions([...completedMissions, missionId]);
     setUnlockedStamps({ ...unlockedStamps, [mission.stampId]: true });
 
@@ -343,9 +346,9 @@ export default function EnglishNeeds() {
     setUnlockedStamps({});
   };
 
-  const generateCode = (prefix) => {
+  const generateCode = (prefix, missionId) => {
     const newCode = `${prefix}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    const newCodes = [...adminCodes, { code: newCode, missions: ['destination', 'recruiter', 'visibility', 'hunter'], used: false, createdAt: new Date().toLocaleString() }];
+    const newCodes = [...adminCodes, { code: newCode, missionId: missionId, createdAt: new Date().toLocaleString() }];
     setAdminCodes(newCodes);
     localStorage.setItem('englishneeds:adminCodes', JSON.stringify(newCodes));
     setMessage(`✨ Code created: ${newCode}`);
@@ -541,6 +544,7 @@ export default function EnglishNeeds() {
           progress={getMissionProgress(selectedMission)}
           onClose={() => setSelectedMission(null)}
           onTaskToggle={(taskId) => toggleMissionTask(selectedMission, taskId)}
+          onUnlock={(missionId, code) => handleMissionUnlock(missionId, code)}
           missionProgress={missionProgress[selectedMission] || {}}
         />
       )}
@@ -565,7 +569,10 @@ export default function EnglishNeeds() {
 // MISSION DETAIL MODAL COMPONENT
 // ============================================================================
 
-function MissionDetailModal({ mission, progress, onClose, onTaskToggle, missionProgress }) {
+function MissionDetailModal({ mission, progress, onClose, onTaskToggle, missionProgress, onUnlock }) {
+  const [unlockCode, setUnlockCode] = useState('');
+  const isComplete = progress.completed === progress.total && progress.total > 0;
+
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-gradient-to-br from-gray-900 to-black rounded-lg max-w-2xl w-full border border-gray-700 my-8">
@@ -637,6 +644,28 @@ function MissionDetailModal({ mission, progress, onClose, onTaskToggle, missionP
               ))}
             </div>
           </div>
+
+          {/* Unlock Code (only if 100% complete) */}
+          {isComplete && (
+            <div className="bg-green-600/10 rounded-lg p-4 border border-green-600/30">
+              <p className="text-sm text-matrix-green font-bold mb-3">✅ All tasks complete! Enter your code to unlock:</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={unlockCode}
+                  onChange={(e) => setUnlockCode(e.target.value)}
+                  placeholder="Enter unlock code..."
+                  className="flex-1 bg-black/50 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-matrix-green"
+                />
+                <button
+                  onClick={() => onUnlock(mission.id, unlockCode)}
+                  className="px-6 py-2 bg-matrix-green text-black font-bold rounded hover:bg-green-300 transition"
+                >
+                  Unlock
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -719,6 +748,7 @@ function AdminPanel({ onLogout, onGenerateCode, adminCodes }) {
   const [adminPassword, setAdminPassword] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [codePrefix, setCodePrefix] = useState('FLOR');
+  const [selectedMissionId, setSelectedMissionId] = useState('mission_1');
 
   const handleLogin = () => {
     if (adminPassword === 'admin123') {
@@ -773,22 +803,38 @@ function AdminPanel({ onLogout, onGenerateCode, adminCodes }) {
         {/* Generate Codes */}
         <section className="bg-black/30 border border-green-900/30 rounded-lg p-6">
           <h2 className="text-xl font-bold mb-4">Generate Student Codes</h2>
-          <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={codePrefix}
-              onChange={(e) => setCodePrefix(e.target.value.toUpperCase())}
-              placeholder="Code prefix (e.g., FLOR)"
-              className="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-matrix-green"
-            />
-            <button
-              onClick={() => onGenerateCode(codePrefix)}
-              className="px-6 py-2 bg-matrix-green text-black font-bold rounded hover:bg-green-300 transition"
-            >
-              Generate
-            </button>
+          <div className="space-y-3 mb-4">
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Select Mission to Unlock:</label>
+              <select
+                value={selectedMissionId}
+                onChange={(e) => setSelectedMissionId(e.target.value)}
+                className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-matrix-green"
+              >
+                {Object.values(MISSIONS).map(mission => (
+                  <option key={mission.id} value={mission.id}>
+                    {mission.emoji} {mission.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={codePrefix}
+                onChange={(e) => setCodePrefix(e.target.value.toUpperCase())}
+                placeholder="Code prefix (e.g., FLOR)"
+                className="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-matrix-green"
+              />
+              <button
+                onClick={() => onGenerateCode(codePrefix, selectedMissionId)}
+                className="px-6 py-2 bg-matrix-green text-black font-bold rounded hover:bg-green-300 transition"
+              >
+                Generate
+              </button>
+            </div>
           </div>
-          <p className="text-sm text-gray-400">Codes unlock 4 missions: Destination, Recruiter Ready, Visibility, Job Hunter</p>
+          <p className="text-sm text-gray-400">Each code unlocks one specific mission</p>
         </section>
 
         {/* Created Codes */}
@@ -798,23 +844,27 @@ function AdminPanel({ onLogout, onGenerateCode, adminCodes }) {
             <p className="text-gray-400">No codes created yet</p>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {adminCodes.map((item, i) => (
-                <div key={i} className="flex items-center justify-between bg-gray-900/50 p-3 rounded border border-gray-700/50">
-                  <div>
-                    <p className="font-mono font-bold text-matrix-green">{item.code}</p>
-                    <p className="text-xs text-gray-500">{item.createdAt}</p>
+              {adminCodes.map((item, i) => {
+                const mission = MISSIONS[item.missionId];
+                return (
+                  <div key={i} className="flex items-center justify-between bg-gray-900/50 p-3 rounded border border-gray-700/50">
+                    <div>
+                      <p className="font-mono font-bold text-matrix-green">{item.code}</p>
+                      <p className="text-xs text-gray-500">{mission?.emoji} {mission?.title}</p>
+                      <p className="text-xs text-gray-600">{item.createdAt}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(item.code);
+                        alert('✅ Copied!');
+                      }}
+                      className="px-3 py-1 bg-blue-600/30 hover:bg-blue-600/50 rounded text-sm transition"
+                    >
+                      Copy
+                    </button>
                   </div>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(item.code);
-                      alert('✅ Copied!');
-                    }}
-                    className="px-3 py-1 bg-blue-600/30 hover:bg-blue-600/50 rounded text-sm transition"
-                  >
-                    Copy
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
