@@ -744,12 +744,26 @@ function AdminPanel({ onLogout, onGenerateCode, adminCodes }) {
   const [codePrefix, setCodePrefix] = useState('FLOR');
   const [selectedMissionId, setSelectedMissionId] = useState('mission_1');
 
-  const handleLogin = () => {
-    if (adminPassword === 'Flor2025!Skool') {
-      setIsLoggedIn(true);
-      setAdminPassword('');
-    } else {
-      alert('❌ Wrong password');
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem('englishneeds:adminToken', data.token);
+        setIsLoggedIn(true);
+        setAdminPassword('');
+      } else {
+        alert('❌ Wrong password');
+      }
+    } catch (error) {
+      alert('❌ Error connecting to server');
+      console.error(error);
     }
   };
 
